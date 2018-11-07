@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+
+<!DOCTYPE struts PUBLIC
+	"-//Apache Software Foundation//DTD Struts Configuration 2.5//EN"
+	"http://struts.apache.org/dtds/struts-2.5.dtd">
+<struts>
+    <package name="basePackage" extends="struts-default,json-default">
+        <!-- 未到找Action指向页面 -->
+        <default-action-ref name="404" />
+
+        <global-exception-mappings>
+            <exception-mapping result="exception" exception="java.lang.Exception"></exception-mapping>
+        </global-exception-mappings>
+
+        <action name="404">
+            <result type="dispatcher">/404.jsp</result>
+        </action>
+    </package>
+    
+    <!-- 入口地址：http://localhost:8888/struts2-test/test/gotoStruts2JsonPlugin.action -->
+    <package name="ajax" namespace="/testajax" extends="basePackage">
+        <action name="struts2JsonPlugin" method="struts2JsonPlugin" class="com.ccg.struts.actions.ajax.Struts2AjaxAction">
+            <result type="json">
+                <!-- 指定浏览器不缓存服务器响应 -->
+                <param name="noCache">true</param>
+                <!-- 指定不包括Action中值为null的属性 -->
+                <param name="excludeNullProperties">true</param>
+            </result>
+        </action>    
+        <action name="checkUser" method="checkUser" class="com.ccg.struts.actions.ajax.UserAjaxAction">
+        	<!-- checkUser方法返回值：success，类型是json，则将root里面的数据返回到浏览器 -->
+            <result name="success" type="json">
+                <!-- 指定浏览器不缓存服务器响应 -->
+                <param name="noCache">true</param>
+                <!-- 指定不包括Action中值为null的属性 -->
+                <param name="excludeNullProperties">true</param>
+                <!-- 返回UserAjaxAction的属性ajaxData -->
+                <param name="root">ajaxData</param>
+            </result>
+        </action>   
+        <action name="*-*" class="com.ccg.struts.actions.{1}Action" method="{2}">
+        	<result name="input">/pages/users/{1}-{2}.jsp</result>
+        </action> 
+    </package>
+</struts>

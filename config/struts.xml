@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+
+<!DOCTYPE struts PUBLIC
+        "-//Apache Software Foundation//DTD Struts Configuration 2.5//EN"
+        "http://struts.apache.org/dtds/struts-2.5.dtd">
+<struts>
+    <!--   允许动态方法调用，可以使用method属性 -->
+    <constant name="struts.enable.DynamicMethodInvocation" value="true" />
+    <!-- 开启调试模式，当请求action出现异常时，会在浏览器返回错误的log，方便调试 -->
+    <constant name="struts.devMode" value="true"/>
+    <!-- 客户端请求时的乱码处理，使用utf-8 -->
+    <constant name="struts.i18n.encoding" value="UTF-8" />
+    <!-- struts.xml文件修改后，是否自动重新加载 -->
+    <constant name="struts.configuration.xml.reload" value="false" />
+    <constant name="struts.locale" value="zh_CN" />
+    
+    <!-- <constant name="struts.objectFactory" value="spring" />
+    <constant name="struts.i18n.reload" value="false" />
+    <constant name="struts.custom.i18n.resources" value="messageResource" />
+    <constant name="struts.action.extension" value="action,do," />
+    <constant name="struts.multipart.maxSize" value="10000000" />
+    <constant name="struts.convention.package.locators.basePackage" value="com.ahcw" />
+    <constant name="struts.convention.result.path" value="/" />
+    <constant name="struts.serve.static" value="true" />
+    <constant name="struts.serve.static.browserCache" value="false" />
+     -->
+   
+   <!-- 继承的是在jar包的struts-default.xml中有默认的package包：struts-default -->
+    <package name="default" namespace="/" extends="struts-default">
+		<action name="login" method="login" class="com.ccg.struts.actions.LoginAction">
+			<!-- type类型，默认是请求转发type="dispatcher" -->
+			<result name="success" type="dispatcher">/pages/login/login.jsp</result>
+			<result name="login" type="redirect">/pages/login/login.jsp</result>
+			<!-- 重定向到另一个action,strutsdemo空间下的action:login2 -->
+			<result name="list" type="redirectAction">
+				<param name="actionName">login2</param>
+				<param name="namespace">/strutsdemo</param>
+			</result>
+		</action> 
+    </package>
+    
+    <package name="user" namespace="/user" extends="struts-default">
+    	<interceptors>
+    		<interceptor name="checkLogin" class="com.ccg.struts.interceptor.MyLoginInterceptor"></interceptor>
+    	</interceptors>
+    	<!-- 默认action，当请求包内的action不存在时，跳转到defaultAction，包内有效。 -->
+    	<default-action-ref name="defaultAction"></default-action-ref>
+		<action name="defaultAction">
+			<result>/user_default.jsp</result>
+		</action>
+    	
+    	<!-- 方式一:没有method，进入excute方法 -->
+		<action name="userlist" class="com.ccg.struts.actions.UserAction">
+			<result name="success" >/pages/user/listUser.jsp</result>
+		</action>
+		<!-- 方式二:进入method方法 -->
+		<action name="user_add" method="add" class="com.ccg.struts.actions.UserAction">
+			<result name="success" >/pages/user/addUser.jsp</result>
+		</action>
+		<action name="user_delete" method="delete" class="com.ccg.struts.actions.UserAction">
+			<result name="success" >/pages/user/deleteUser.jsp</result>
+		</action>
+		<action name="user_detail" method="detail" class="com.ccg.struts.actions.UserAction">
+			<result name="success" >/pages/user/detailUser.jsp</result>
+		</action>
+		
+		
+		<!-- 通配符配置action(2.5似乎不支持，pass)：替代user_add,user_delete,user_detail。
+				任意字符都可以通过action拦截器不出异常，然后找方法的时候报错 -->
+    	<action name="user_bak*" method="{1}" class="com.ccg.struts.actions.UserAction">
+    		<!-- 出现异常，则跳转至"exception"这个result。控制台不输出异常。-->
+			<exception-mapping result="userException" exception="java.lang.Exception"></exception-mapping>
+			<result name="success" >/pages/user/{1}User.jsp</result>
+			<!-- 通过拦截器，发现没有用户名，则进入login.jsp -->
+			<result name="input" >/pages/login/login.jsp</result>
+			<result name="userException" >/pages/login/userException.jsp</result>
+			<interceptor-ref name="checkLogin"></interceptor-ref>
+			<!-- 要有默认的拦截器，struts里面会对表单控件等做拦截，否则获取不到数据 -->
+			<interceptor-ref name="defaultStack"></interceptor-ref>
+		</action>
+    </package>
+    
+	<include file="struts/struts_demo.xml"></include>
+	<include file="struts/struts_ajax.xml"></include>
+</struts>
